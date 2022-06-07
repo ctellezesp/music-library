@@ -1,13 +1,6 @@
 import { createContext, useState, FC, ReactElement } from 'react';
+import { ILibraryContext } from '../models/library-context.model';
 import { ISong } from '../models/song.model';
-
-interface ILibraryContext {
-	songs: ISong[];
-	fetchSongs: (items: ISong[]) => void;
-	addSong: (song: ISong) => void;
-	editSong: (song: ISong) => void;
-	deleteSong: (songId: string) => void;
-}
 
 export const LibraryContext = createContext<ILibraryContext>({
 	songs: [],
@@ -15,6 +8,7 @@ export const LibraryContext = createContext<ILibraryContext>({
 	addSong: (song: ISong) => null,
 	editSong: (song: ISong) => null,
 	deleteSong: (songId: string) => null,
+	getSong: (songId: string) => null,
 });
 
 type ComponentType = {
@@ -44,9 +38,15 @@ export const LibraryContextProvider: FC<ComponentType> = ({ children }) => {
 		setSongs(songs.filter((song: ISong) => song.id === songId));
 	};
 
+	const getSong = (songId: string): ISong | null | undefined => {
+		return songs.length > 0
+			? songs.find((songItem: ISong) => songItem.id === songId)
+			: null;
+	};
+
 	return (
 		<LibraryContext.Provider
-			value={{ songs, fetchSongs, addSong, editSong, deleteSong }}
+			value={{ songs, fetchSongs, addSong, editSong, deleteSong, getSong }}
 		>
 			{children}
 		</LibraryContext.Provider>

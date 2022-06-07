@@ -3,5 +3,5 @@ export interface ISong {
   title: string;
   content: string;
   date: number;
-  files?: File[];
+  files?: string[];
 }

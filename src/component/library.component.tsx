@@ -16,6 +16,7 @@ import { ISong } from '../models/song.model';
 import { getLibraryItems } from '../services/library.service';
 import { cutString } from '../utils/cut-string.util';
 import { Spinner } from './spinner.component';
+import { orderByUtil } from '../utils/order-by.util';
 
 export const LibraryComponent: FC = (): JSX.Element => {
 	const { songs, fetchSongs } = useContext(LibraryContext);
@@ -32,13 +33,16 @@ export const LibraryComponent: FC = (): JSX.Element => {
 			setLoading(false);
 		};
 		getSongs();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
 		const { value } = event.currentTarget;
 		setState(
 			value.length
-				? state.filter((item: ISong) => item.title.includes(value))
+				? state.filter((item: ISong) =>
+						item.title.toLowerCase().includes(value.toLowerCase())
+				  )
 				: songs
 		);
 	};
@@ -51,7 +55,12 @@ export const LibraryComponent: FC = (): JSX.Element => {
 		<Spinner />
 	) : (
 		<>
-			<Grid container justifyContent="center" alignItems="center">
+			<Grid
+				container
+				justifyContent="center"
+				alignItems="center"
+				sx={{ marginTop: '15px' }}
+			>
 				<Grid item xs={12} md={8} lg={6}>
 					<TextField
 						fullWidth
@@ -65,17 +74,26 @@ export const LibraryComponent: FC = (): JSX.Element => {
 					<Button
 						variant="contained"
 						startIcon={<AddIcon />}
-						onClick={() => redirectTo('/create')}
 						sx={{
 							margin: '10px 0',
 						}}
+						onClick={() => redirectTo('/create')}
 					>
 						Añadir Canción
 					</Button>
-					<Grid container>
+					{!state.length && (
+						<Typography
+							variant="body1"
+							align="center"
+							sx={{ margin: '10px 0' }}
+						>
+							No se encontraron elementos
+						</Typography>
+					)}
+					<Grid container spacing={2}>
 						{state.length > 0 &&
-							state.map((item: ISong) => (
-								<Grid xs={12} md={6} lg={4}>
+							orderByUtil(state, 'title', 'asc').map((item: ISong) => (
+								<Grid item xs={12} md={4}>
 									<Paper elevation={1} sx={{ padding: '10px' }}>
 										<Typography variant="h5">{item.title}</Typography>
 										<Typography variant="body2" align="justify">
@@ -84,19 +102,14 @@ export const LibraryComponent: FC = (): JSX.Element => {
 										<Stack direction="row-reverse">
 											<Button
 												variant="text"
-												onClick={() => redirectTo(`/${item.id}`)}
+												onClick={() => redirectTo(`/song/${item.id}`)}
 											>
-												Ver contenido completo
+												Ver contenido
 											</Button>
 										</Stack>
 									</Paper>
 								</Grid>
 							))}
-						{!state.length && (
-							<Typography variant="body1">
-								No se encontraron elementos
-							</Typography>
-						)}
 					</Grid>
 				</Grid>
 			</Grid>
